@@ -1,0 +1,32 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Scissors over an audio waveform, in restrained teal/lavender -->
+    <path
+        android:fillColor="#00FFFFFF"
+        android:pathData="M0,0h108v108h-108z" />
+    <!-- Waveform bars -->
+    <path
+        android:fillColor="#5F6DF0"
+        android:pathData="M24,60 L28,60 L28,48 L32,48 L32,66 L36,66 L36,42 L40,42 L40,70 L44,70 L44,48 L48,48 L48,60 Z" />
+    <path
+        android:fillColor="#5F6DF0"
+        android:pathData="M60,60 L64,60 L64,50 L68,50 L68,64 L72,64 L72,44 L76,44 L76,66 L80,66 L80,52 L84,52 L84,60 Z" />
+    <!-- Blade lines -->
+    <path
+        android:strokeColor="#E6E9F2"
+        android:strokeWidth="3"
+        android:pathData="M52,44 L50,54 L46,60 L50,66 L52,76 Z" />
+    <path
+        android:strokeColor="#E6E9F2"
+        android:strokeWidth="3"
+        android:pathData="M52,44 L56,54 L60,60 L56,66 L52,76 Z" />
+    <!-- Cut line -->
+    <path
+        android:strokeColor="#E6E9F2"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M54,44 L54,76" />
+</vector>

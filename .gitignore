@@ -1,0 +1,27 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local configuration
+local.properties
+*.properties.bak
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Signing secrets — never commit keystores or passwords
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# Misc
+/captures
+.externalNativeBuild
+.cxx
