@@ -93,7 +93,7 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
                 if (release == null) {
                     UpdateCheckState.UpToDate
                 } else {
-                    val apk = release.assets.firstOrNull { it.isApk }
+                    val apk = release.assets.firstOrNull { it.isInstallable }
                     UpdateCheckState.Available(release, apk)
                 }
             } catch (e: ClearCutError) {

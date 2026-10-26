@@ -72,18 +72,32 @@ jobs:
       - name: Build release APK
         run: ./gradlew :app:assembleRelease --stacktrace
 
+      # Stage APKs into a flat dist/ dir with readable names. The in-app updater
+      # only offers signed release APKs, so release attachments carry the signed
+      # build when signing is configured and the unsigned/debug ones otherwise.
+      - name: Stage APK outputs
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/*.apk dist/clearcut-debug.apk
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            cp app/build/outputs/apk/release/app-release.apk dist/clearcut-release.apk
+          elif [ -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp app/build/outputs/apk/release/app-release-unsigned.apk dist/clearcut-release-unsigned.apk
+          fi
+          ls -la dist
+
       - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: clearcut-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: dist/clearcut-debug.apk
           if-no-files-found: error
 
       - name: Upload release APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: clearcut-release-apk
-          path: app/build/outputs/apk/release/*.apk
+          path: dist/clearcut-release*.apk
           if-no-files-found: error
 
       - name: Upload test reports (on failure)
@@ -97,6 +111,9 @@ jobs:
 
       # Build a release when a v* tag is pushed (covers the tag-driven flow),
       # and attach APKs to an already-published release when the event is a release.
+      # The dist glob matches whichever release APK was staged (signed when
+      # signing secrets are configured; unsigned otherwise). Debug builds are
+      # never attached to releases.
       - name: Create/update GitHub Release from tag
         if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
         uses: softprops/action-gh-release@v2
@@ -106,14 +123,10 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-          files: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/release/*.apk
+          files: dist/clearcut-release*.apk
 
       - name: Attach APKs to GitHub Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/release/*.apk
+          files: dist/clearcut-release*.apk

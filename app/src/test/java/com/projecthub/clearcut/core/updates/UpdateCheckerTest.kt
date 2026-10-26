@@ -86,6 +86,18 @@ class UpdateCheckerTest {
     }
 
     @Test
+    fun `only signed release apks are installable update candidates`() {
+        fun asset(name: String) = ReleaseInfo.Asset(name, "https://example.com/$name", sizeBytes = 100)
+
+        assertThat(asset("clearcut-release.apk").isInstallable).isTrue()
+        assertThat(asset("clearcut-v1.1.0-full.apk").isInstallable).isTrue()
+        assertThat(asset("app-release.apk").isInstallable).isTrue()
+        assertThat(asset("app-debug.apk").isInstallable).isFalse()
+        assertThat(asset("app-release-unsigned.apk").isInstallable).isFalse()
+        assertThat(asset("notes.txt").isInstallable).isFalse()
+    }
+
+    @Test
     fun `server error surfaces as ClearCutError`() = runTest {
         server.enqueue(MockResponse().setResponseCode(500))
         val thrown = runCatching { checker.checkForUpdate("1.0.0") }.exceptionOrNull()

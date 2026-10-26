@@ -37,6 +37,12 @@ data class ReleaseInfo(
     ) {
         /** The installable APK asset, if this release publishes one. */
         val isApk: Boolean get() = name.endsWith(".apk", ignoreCase = true)
+
+        /** Debug and unsigned builds are never candidates for an update. */
+        val isInstallable: Boolean
+            get() = isApk &&
+                !name.contains("debug", ignoreCase = true) &&
+                !name.contains("unsigned", ignoreCase = true)
     }
 
     companion object {
