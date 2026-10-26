@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -13,10 +15,31 @@ android {
         applicationId = "com.projecthub.clearcut"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+    }
+
+    val signingProps = Properties().apply {
+        val f = rootProject.file("keystore.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+
+    signingConfigs {
+        // Signing is optional and intentionally never committed. Create a
+        // keystore.properties file (gitignored) with SIGNING_KEYSTORE,
+        // SIGNING_KEY_ALIAS, SIGNING_KEY_PASSWORD and SIGNING_STORE_PASSWORD to
+        // produce installable release builds.
+        create("release") {
+            val keystorePath = signingProps.getProperty("SIGNING_KEYSTORE")
+            if (keystorePath != null) {
+                storeFile = rootProject.file(keystorePath)
+                storePassword = signingProps.getProperty("SIGNING_STORE_PASSWORD")
+                keyAlias = signingProps.getProperty("SIGNING_KEY_ALIAS")
+                keyPassword = signingProps.getProperty("SIGNING_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -26,6 +49,9 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            if (rootProject.file("keystore.properties").exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

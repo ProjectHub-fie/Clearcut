@@ -53,10 +53,14 @@ audio/video intervals in the **Copyright Removal Lab** and export a validated MP
   custom animated processing states (validating / in progress / completed / with
   warnings / cancelled / failed), reduced-motion support, accessible contrast and
   touch targets, adaptive layouts.
+- **In-app updates**: Settings → Updates checks the GitHub Releases feed for a newer
+  ClearCut, then downloads and installs a newer APK through the system package
+  installer. The check is read-only; stable releases only, and the update install
+  always goes through the user-visible system prompt.
 - **Privacy by default**: all analysis runs on-device. Nothing is uploaded unless a
   future user-authorized feature explicitly says so. No login cookies, no social
-  passwords, no DRM circumvention. Internet is only used for URL imports and any
-  provider calls the user explicitly authorizes.
+  passwords, no DRM circumvention. Internet is only used for URL imports, the
+  user-initiated update check, and any provider calls the user explicitly authorizes.
 
 ## Architecture
 
@@ -72,6 +76,7 @@ com.projecthub.clearcut
 ├── core/report        TXT + JSON report generation
 ├── core/scanner       AudioAnalyzer, VisualAnalyzer, StructuralAnalyzer, MultiMethodScanner
 ├── core/storage       Room (projects/history), DataStore preferences, StorageHelper
+├── core/updates       Release check (GitHub Releases), APK download & install
 ├── di                 Manual DI container
 ├── feature/home       Dashboard
 ├── feature/import     Local + URL import
@@ -104,10 +109,10 @@ a foreground service so they survive leaving the screen.
 APK outputs land in `app/build/outputs/apk/debug/` and
 `app/build/outputs/apk/release/`.
 
-### CI
+### CI & releases
 
-`.github/workflows/android-build.yml` runs on push to `main`/`master`, pull requests,
-manual dispatch, and published releases. It:
+`.github/workflows/android-build.yml` runs on push to `main`/`master`, `v*` tags, pull
+requests, manual dispatch, and published releases. It:
 
 1. Checks out the repository, sets up JDK 17, configures Gradle caching.
 2. Builds the debug APK.
@@ -115,13 +120,20 @@ manual dispatch, and published releases. It:
 4. Runs lint.
 5. Builds the release APK.
 6. Uploads both APKs as workflow artifacts, and test/lint reports on failure.
-7. Attaches APK assets to the triggering GitHub Release when the event is a release.
+7. Creates a GitHub Release (with both APKs attached) when a `v*` tag is pushed.
+8. Attaches APK assets to the triggering GitHub Release when the event is a release.
 
-Release signing is intentionally **not** wired into the workflow. To publish signed
-release builds, configure the standard Android signing in `app/build.gradle.kts` and
-supply `SIGNING_KEYSTORE` and related secrets through GitHub Secrets. **Never commit
-keystores, passwords, or signing keys** — the repository `.gitignore` excludes
-`*.jks`, `*.keystore`, and `keystore.properties`.
+Release signing is optionally wired through GitHub Secrets. To publish signed,
+installable release builds (required for the in-app updater), add these secrets and
+the workflow writes `keystore.properties` automatically:
+
+- `SIGNING_KEYSTORE_BASE64` — the base64-encoded release keystore
+- `SIGNING_KEY_ALIAS`, `SIGNING_KEY_PASSWORD`, `SIGNING_STORE_PASSWORD`
+
+Local release builds are signed when a `keystore.properties` file exists next to the
+module with `SIGNING_KEYSTORE`, `SIGNING_KEY_ALIAS`, `SIGNING_KEY_PASSWORD`,
+`SIGNING_STORE_PASSWORD`. **Never commit keystores, passwords, or signing keys** — the
+repository `.gitignore` excludes `*.jks`, `*.keystore`, and `keystore.properties`.
 
 ## Supported import sources
 
@@ -150,8 +162,9 @@ alternatives — import a local file or the direct media link you are authorized
 - **Works offline**: local import, all three analysis methods, the editor, and
   export/reports run fully on-device. No online copyright database, mandatory
   backend, paid fingerprint API, or API key is required.
-- **Needs internet**: URL import (direct media links), and anything a future adapter
-  explicitly requires with user authorization.
+- **Needs internet**: URL import (direct media links), the user-initiated in-app
+  update check and download, and anything a future adapter explicitly requires with
+  user authorization.
 - **Permissions requested**: `INTERNET`, `ACCESS_NETWORK_STATE`,
   `FOREGROUND_SERVICE(_DATA_SYNC)` for exports, and `POST_NOTIFICATIONS`. No broad
   storage read, no contacts, no location.

@@ -11,6 +11,8 @@ import com.projecthub.clearcut.core.scanner.MultiMethodScanner
 import com.projecthub.clearcut.core.storage.ClearCutDatabase
 import com.projecthub.clearcut.core.storage.PreferencesStore
 import com.projecthub.clearcut.core.storage.StorageHelper
+import com.projecthub.clearcut.core.updates.UpdateChecker
+import com.projecthub.clearcut.core.updates.UpdateManager
 
 /** Manual DI container (a genuine helper; no framework dependency). */
 class AppContainer(private val context: Context) {
@@ -41,5 +43,15 @@ class AppContainer(private val context: Context) {
         )
     }
     val downloader by lazy { OkHttpDownloader(OkHttpDownloader.defaultClient()) }
+    val updateChecker by lazy { UpdateChecker(UpdateChecker.defaultClient()) }
+    val updateManager by lazy { UpdateManager(context.applicationContext, downloader) }
     val storageHelper by lazy { StorageHelper }
+
+    /** The installed app version from the package manager (e.g. "1.1.0"). */
+    val appVersionName: String
+        get() = try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: ""
+        } catch (e: Exception) {
+            ""
+        }
 }
