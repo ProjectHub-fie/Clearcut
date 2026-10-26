@@ -47,14 +47,20 @@ jobs:
       - name: Run lint (debug)
         run: ./gradlew :app:lintDebug --stacktrace
 
+      # Signing is optional: when the secrets are unset the release APK is
+      # simply built unsigned (the workflow never fails over missing secrets).
       - name: Configure release signing
-        if: ${{ secrets.SIGNING_KEYSTORE_BASE64 != '' }}
+        shell: bash
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
         run: |
+          if [ -z "$SIGNING_KEYSTORE_BASE64" ]; then
+            echo "No signing secrets configured; building an unsigned release APK."
+            exit 0
+          fi
           echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > release.jks
           cat > keystore.properties <<EOF
           SIGNING_KEYSTORE=release.jks
