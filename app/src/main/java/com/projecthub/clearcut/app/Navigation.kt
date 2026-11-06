@@ -39,18 +39,23 @@ import com.projecthub.clearcut.feature.import.ImportRoute
 import com.projecthub.clearcut.feature.projects.ProjectsRoute
 import com.projecthub.clearcut.feature.scanner.ScannerRoute
 import com.projecthub.clearcut.feature.settings.SettingsRoute
+import com.projecthub.clearcut.feature.timeline.StudioRoute
+import com.projecthub.clearcut.feature.timeline.TimelineRoute
 
 object Routes {
     const val HOME = "home"
     const val IMPORT = "import"
     const val SCANNER = "scanner/{mediaUri}"
     const val EDITOR = "editor/{mediaUri}"
+    const val TIMELINE = "timeline/{mediaUri}"
+    const val STUDIO = "studio"
     const val EXPORT = "export"
     const val PROJECTS = "projects"
     const val SETTINGS = "settings"
 
     fun buildScanner(mediaUri: String): String = "scanner/${encode(mediaUri)}"
     fun buildEditor(mediaUri: String): String = "editor/${encode(mediaUri)}"
+    fun buildTimeline(mediaUri: String): String = "timeline/${encode(mediaUri)}"
 
     private fun encode(value: String): String =
         java.net.URLEncoder.encode(value, "UTF-8").replace("+", "%20")
@@ -66,7 +71,7 @@ private data class NavItem(
 private val bottomItems = listOf(
     NavItem(Routes.HOME, "Home", Icons.Outlined.Home, Icons.Filled.Home),
     NavItem(Routes.SCANNER, "Scan", Icons.Outlined.DocumentScanner, Icons.Filled.DocumentScanner),
-    NavItem(Routes.EDITOR, "Editor", Icons.Outlined.Edit, Icons.Filled.Edit),
+    NavItem(Routes.STUDIO, "Studio", Icons.Outlined.Edit, Icons.Filled.Edit),
     NavItem(Routes.PROJECTS, "Projects", Icons.Outlined.Folder, Icons.Filled.Folder),
     NavItem(Routes.SETTINGS, "Settings", Icons.Outlined.Settings, Icons.Filled.Settings),
 )
@@ -95,7 +100,7 @@ fun ClearCutApp() {
                 ImportRoute(
                     onBack = { navController.popBackStack() },
                     onImported = { mediaUri -> navController.navigate(Routes.buildScanner(mediaUri)) },
-                    onOpenEditor = { mediaUri -> navController.navigate(Routes.buildEditor(mediaUri)) },
+                    onOpenEditor = { mediaUri -> navController.navigate(Routes.buildTimeline(mediaUri)) },
                 )
             }
             composable(
@@ -106,7 +111,7 @@ fun ClearCutApp() {
                 ScannerRoute(
                     mediaUri = uri,
                     onBack = { navController.popBackStack() },
-                    onOpenEditor = { mediaUri -> navController.navigate(Routes.buildEditor(mediaUri)) },
+                    onOpenEditor = { mediaUri -> navController.navigate(Routes.buildTimeline(mediaUri)) },
                 )
             }
             composable(
@@ -117,6 +122,26 @@ fun ClearCutApp() {
                 EditorRoute(
                     mediaUri = uri,
                     onBack = { navController.popBackStack() },
+                )
+            }
+            composable(
+                Routes.TIMELINE,
+                arguments = listOf(navArgument("mediaUri") { type = NavType.StringType }),
+            ) { entry ->
+                val uri = entry.arguments?.getString("mediaUri") ?: ""
+                TimelineRoute(
+                    mediaUri = uri,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable(Routes.STUDIO) {
+                StudioRoute(
+                    onBack = { navController.popBackStack() },
+                    onNewProject = { navController.navigate(Routes.IMPORT) },
+                    onOpenProject = { timeline ->
+                        val uri = timeline.sourceUri ?: timeline.projectId
+                        navController.navigate(Routes.buildTimeline(uri))
+                    },
                 )
             }
             composable(Routes.EXPORT) {

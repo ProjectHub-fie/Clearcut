@@ -3,6 +3,7 @@ package com.projecthub.clearcut.di
 import android.content.Context
 import com.projecthub.clearcut.core.media.ExportRenderer
 import com.projecthub.clearcut.core.media.MediaDecoders
+import com.projecthub.clearcut.core.media.TimelineRenderer
 import com.projecthub.clearcut.core.media.MediaInspector
 import com.projecthub.clearcut.core.network.DirectMediaAdapter
 import com.projecthub.clearcut.core.network.OkHttpDownloader
@@ -10,6 +11,7 @@ import com.projecthub.clearcut.core.network.SourceAdapterRegistry
 import com.projecthub.clearcut.core.scanner.MultiMethodScanner
 import com.projecthub.clearcut.core.storage.ClearCutDatabase
 import com.projecthub.clearcut.core.storage.PreferencesStore
+import com.projecthub.clearcut.core.storage.ProjectRepository
 import com.projecthub.clearcut.core.storage.StorageHelper
 import com.projecthub.clearcut.core.updates.UpdateChecker
 import com.projecthub.clearcut.core.updates.UpdateManager
@@ -21,6 +23,8 @@ class AppContainer(private val context: Context) {
     val database by lazy { ClearCutDatabase.get(context.applicationContext) }
     val projectDao by lazy { database.projectDao() }
     val scanHistoryDao by lazy { database.scanHistoryDao() }
+    val projectRepository by lazy { ProjectRepository(projectDao) }
+    val timelineRenderer by lazy { TimelineRenderer(context.applicationContext) }
 
     val mediaInspector by lazy { MediaInspector(context.applicationContext) }
     val mediaDecoders by lazy { MediaDecoders(context.applicationContext) }
