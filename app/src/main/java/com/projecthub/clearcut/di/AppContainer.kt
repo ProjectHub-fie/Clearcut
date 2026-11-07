@@ -24,6 +24,7 @@ class AppContainer(private val context: Context) {
     val projectDao by lazy { database.projectDao() }
     val scanHistoryDao by lazy { database.scanHistoryDao() }
     val projectRepository by lazy { ProjectRepository(projectDao) }
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     val timelineRenderer by lazy { TimelineRenderer(context.applicationContext) }
 
     val mediaInspector by lazy { MediaInspector(context.applicationContext) }
