@@ -8,7 +8,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
 import android.net.Uri
-import androidx.media3.common.C
 import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.audio.AudioProcessor
@@ -219,7 +218,7 @@ class TimelineRenderer(private val context: Context) {
         val effects = Effects(audioProcessors, videoEffects)
         return EditedMediaItem.Builder(mediaItem)
             .setDurationUs(durationUs)
-            .setFrameRate(if (timeline.frameRateFps > 0) timeline.frameRateFps else C.RATE_UNSET_INT)
+            .setFrameRate(if (timeline.frameRateFps > 0) timeline.frameRateFps else 30)
             .setEffects(effects)
             .build()
     }
@@ -239,7 +238,7 @@ class TimelineRenderer(private val context: Context) {
         val effects = Effects(emptyList(), videoEffects)
         return EditedMediaItem.Builder(mediaItem)
             .setDurationUs(durationUs)
-            .setFrameRate(if (timeline.frameRateFps > 0) timeline.frameRateFps else C.RATE_UNSET_INT)
+            .setFrameRate(if (timeline.frameRateFps > 0) timeline.frameRateFps else 30)
             .setEffects(effects)
             .build()
     }
@@ -266,7 +265,7 @@ class TimelineRenderer(private val context: Context) {
         )
         return EditedMediaItem.Builder(mediaItem)
             .setDurationUs(durationUs)
-            .setFrameRate(if (timeline.frameRateFps > 0) timeline.frameRateFps else C.RATE_UNSET_INT)
+            .setFrameRate(if (timeline.frameRateFps > 0) timeline.frameRateFps else 30)
             .setEffects(effects)
             .build()
     }
